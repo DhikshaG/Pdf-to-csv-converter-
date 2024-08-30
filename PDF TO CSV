@@ -1,0 +1,49 @@
+Code 
+import fitz  # PyMuPDF
+import os
+import pandas as pd
+from google.colab import files
+
+def pdf_to_csv(pdf_path, csv_path):
+    """Convert a PDF file to a CSV file."""
+    # Open the PDF file
+    doc = fitz.open(pdf_path)
+    text = ''
+    for page in doc:
+        text += page.get_text()
+    doc.close()
+
+    # Split text into lines
+    lines = text.split('\n')
+    
+    # Convert to DataFrame
+    df = pd.DataFrame(lines, columns=['Text'])
+    
+    # Save DataFrame to CSV
+    df.to_csv(csv_path, index=False)
+
+# Step 1: Upload the PDF file
+uploaded = files.upload()
+
+# Ensure exactly one file is uploaded
+if len(uploaded) != 1:
+    raise ValueError("Please upload exactly one PDF file.")
+
+# Get the PDF file name and path
+pdf_filename = list(uploaded.keys())[0]
+pdf_path = '/content/' + pdf_filename  # Explicit path to the uploaded PDF file
+
+# Define the directory and CSV path
+csv_directory = '/content/csv_files/'
+csv_filename = pdf_filename.replace('.pdf', '.csv')
+csv_path = os.path.join(csv_directory, csv_filename)
+
+# Create directory for CSV file if it doesn't exist
+if not os.path.exists(csv_directory):
+    os.makedirs(csv_directory)
+
+# Convert PDF to CSV and save it
+pdf_to_csv(pdf_path, csv_path)
+
+# Confirm that the CSV file has been saved
+print(f"CSV file has been saved to: {csv_path}")
